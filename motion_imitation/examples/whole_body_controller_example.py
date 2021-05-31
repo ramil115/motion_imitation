@@ -32,12 +32,13 @@ from motion_imitation.robots import a1
 from motion_imitation.robots import robot_config
 from motion_imitation.robots.gamepad import gamepad_reader
 
+# flags.DEFINE_string("logdir", "log_data", "where to log trajectories.")
 flags.DEFINE_string("logdir", None, "where to log trajectories.")
 flags.DEFINE_bool("use_gamepad", False,
                   "whether to use gamepad to provide control input.")
 flags.DEFINE_bool("use_real_robot", False,
                   "whether to use real robot or simulation")
-flags.DEFINE_bool("show_gui", False, "whether to show GUI.")
+flags.DEFINE_bool("show_gui", True, "whether to show GUI.")
 flags.DEFINE_float("max_time_secs", 1., "maximum time to run the robot.")
 FLAGS = flags.FLAGS
 
@@ -225,7 +226,7 @@ def main(argv):
       actual_duration = time.time() - start_time_wall
       if actual_duration < expected_duration:
         time.sleep(expected_duration - actual_duration)
-    print("actual_duration=", actual_duration)
+    # print("actual_duration=", actual_duration)
   if FLAGS.use_gamepad:
     gamepad.stop()
 
