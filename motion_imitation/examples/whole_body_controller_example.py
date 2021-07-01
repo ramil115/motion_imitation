@@ -183,7 +183,7 @@ def main(argv):
                   enable_action_interpolation=False,
                   reset_time=2,
                   time_step=0.002,
-                  action_repeat=1, urdf_filename= )
+                  action_repeat=1)
 
   controller = _setup_controller(robot)
 
