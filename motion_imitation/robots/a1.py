@@ -35,18 +35,18 @@ from motion_imitation.envs import locomotion_gym_config
 NUM_MOTORS = 12
 NUM_LEGS = 4
 MOTOR_NAMES = [
-    "FR_hip_joint",
-    "FR_upper_joint",
-    "FR_lower_joint",
-    "FL_hip_joint",
-    "FL_upper_joint",
-    "FL_lower_joint",
-    "RR_hip_joint",
-    "RR_upper_joint",
-    "RR_lower_joint",
-    "RL_hip_joint",
-    "RL_upper_joint",
-    "RL_lower_joint",
+    "right_forward_hip_joint",
+    "right_forward_thigh_joint",
+    "right_forward_calf_joint",
+    "left_forward_hip_joint",
+    "left_forward_thigh_joint",
+    "left_forward_calf_joint",
+    "right_back_hip_joint",
+    "right_back_thigh_joint",
+    "right_back_calf_joint",
+    "left_back_hip_joint",
+    "left_back_thigh_joint",
+    "left_back_calf_joint",
 ]
 INIT_RACK_POSITION = [0, 0, 1]
 INIT_POSITION = [0, 0, 0.32]
@@ -83,11 +83,14 @@ KNEE_D_GAIN = 2.0
 INIT_MOTOR_ANGLES = np.array([0, 0.9, -1.8] * NUM_LEGS)
 
 HIP_NAME_PATTERN = re.compile(r"\w+_hip_\w+")
-UPPER_NAME_PATTERN = re.compile(r"\w+_upper_\w+")
-LOWER_NAME_PATTERN = re.compile(r"\w+_lower_\w+")
-TOE_NAME_PATTERN = re.compile(r"\w+_toe\d*")
+# UPPER_NAME_PATTERN = re.compile(r"\w+_upper_\w+")
+# LOWER_NAME_PATTERN = re.compile(r"\w+_lower_\w+")
+UPPER_NAME_PATTERN = re.compile(r"\w+_thigh_\w+")
+LOWER_NAME_PATTERN = re.compile(r"\w+_calf_\w+")
+FIXED_MOTOR_NAME_PATTERN = re.compile(r"\w+_motor")
+# TOE_NAME_PATTERN = re.compile(r"\w+_toe\d*")
+TOE_NAME_PATTERN = re.compile(r"\w+_foot\d*")
 IMU_NAME_PATTERN = re.compile(r"imu\d*")
-
 URDF_FILENAME = "a1/a1.urdf"
 
 _BODY_B_FIELD_NUMBER = 2
@@ -184,40 +187,40 @@ class A1(minitaur.Minitaur):
   MPC_BODY_HEIGHT = 0.24
   MPC_VELOCITY_MULTIPLIER = 0.5
   ACTION_CONFIG = [
-      locomotion_gym_config.ScalarField(name="FR_hip_motor",
+      locomotion_gym_config.ScalarField(name="right_forward_hip_joint",
                                         upper_bound=0.802851455917,
                                         lower_bound=-0.802851455917),
-      locomotion_gym_config.ScalarField(name="FR_upper_joint",
+      locomotion_gym_config.ScalarField(name="right_forward_thigh_joint",
                                         upper_bound=4.18879020479,
                                         lower_bound=-1.0471975512),
-      locomotion_gym_config.ScalarField(name="FR_lower_joint",
+      locomotion_gym_config.ScalarField(name="right_forward_calf_joint",
                                         upper_bound=-0.916297857297,
                                         lower_bound=-2.69653369433),
-      locomotion_gym_config.ScalarField(name="FL_hip_motor",
+      locomotion_gym_config.ScalarField(name="left_forward_hip_joint",
                                         upper_bound=0.802851455917,
                                         lower_bound=-0.802851455917),
-      locomotion_gym_config.ScalarField(name="FL_upper_joint",
+      locomotion_gym_config.ScalarField(name="left_forward_thigh_joint",
                                         upper_bound=4.18879020479,
                                         lower_bound=-1.0471975512),
-      locomotion_gym_config.ScalarField(name="FL_lower_joint",
+      locomotion_gym_config.ScalarField(name="left_forward_calf_joint",
                                         upper_bound=-0.916297857297,
                                         lower_bound=-2.69653369433),
-      locomotion_gym_config.ScalarField(name="RR_hip_motor",
+      locomotion_gym_config.ScalarField(name="right_back_hip_joint",
                                         upper_bound=0.802851455917,
                                         lower_bound=-0.802851455917),
-      locomotion_gym_config.ScalarField(name="RR_upper_joint",
+      locomotion_gym_config.ScalarField(name="right_back_thigh_joint",
                                         upper_bound=4.18879020479,
                                         lower_bound=-1.0471975512),
-      locomotion_gym_config.ScalarField(name="RR_lower_joint",
+      locomotion_gym_config.ScalarField(name="right_back_calf_joint",
                                         upper_bound=-0.916297857297,
                                         lower_bound=-2.69653369433),
-      locomotion_gym_config.ScalarField(name="RL_hip_motor",
+      locomotion_gym_config.ScalarField(name="left_back_hip_joint",
                                         upper_bound=0.802851455917,
                                         lower_bound=-0.802851455917),
-      locomotion_gym_config.ScalarField(name="RL_upper_joint",
+      locomotion_gym_config.ScalarField(name="left_back_thigh_joint",
                                         upper_bound=4.18879020479,
                                         lower_bound=-1.0471975512),
-      locomotion_gym_config.ScalarField(name="RL_lower_joint",
+      locomotion_gym_config.ScalarField(name="left_back_calf_joint",
                                         upper_bound=-0.916297857297,
                                         lower_bound=-2.69653369433),
   ]
@@ -670,9 +673,9 @@ class InnoQuad(minitaur.Minitaur):
     for name, i in zip(MOTOR_NAMES, range(len(MOTOR_NAMES))):
       if "hip_joint" in name:
         angle = INIT_MOTOR_ANGLES[i] + HIP_JOINT_OFFSET
-      elif "upper_joint" in name:
+      elif "thigh_joint" in name:
         angle = INIT_MOTOR_ANGLES[i] + UPPER_LEG_JOINT_OFFSET
-      elif "lower_joint" in name:
+      elif "calf_joint" in name:
         angle = INIT_MOTOR_ANGLES[i] + KNEE_JOINT_OFFSET
       else:
         raise ValueError("The name %s is not recognized as a motor joint." %
@@ -716,6 +719,8 @@ class InnoQuad(minitaur.Minitaur):
         self._foot_link_ids.append(joint_id)
       elif IMU_NAME_PATTERN.match(joint_name):
         self._imu_link_ids.append(joint_id)
+      elif FIXED_MOTOR_NAME_PATTERN.match(joint_name):
+        continue
       else:
         raise ValueError("Unknown category of joint %s" % joint_name)
 

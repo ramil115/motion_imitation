@@ -39,7 +39,7 @@ flags.DEFINE_bool("use_gamepad", False,
 flags.DEFINE_bool("use_real_robot", False,
                   "whether to use real robot or simulation")
 flags.DEFINE_bool("show_gui", True, "whether to show GUI.")
-flags.DEFINE_float("max_time_secs", 10., "maximum time to run the robot.")
+flags.DEFINE_float("max_time_secs", 1., "maximum time to run the robot.")
 FLAGS = flags.FLAGS
 
 _NUM_SIMULATION_ITERATION_STEPS = 300
@@ -183,7 +183,7 @@ def main(argv):
                   enable_action_interpolation=False,
                   reset_time=2,
                   time_step=0.002,
-                  action_repeat=1)
+                  action_repeat=1, urdf_filename = "/robots/urdf/InnoQuad.urdf")
 
   controller = _setup_controller(robot)
 
